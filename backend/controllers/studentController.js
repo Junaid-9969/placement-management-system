@@ -191,6 +191,9 @@ exports.getStudentDashboard = async (req, res) => {
       const matchedSkills = jobSkills.filter(skill =>
         studentSkills.includes(skill)
       );
+      if (matchedSkills.length === 0) {
+  return null;
+}
 
       const skillMatch =
         jobSkills.length > 0
@@ -221,6 +224,7 @@ exports.getStudentDashboard = async (req, res) => {
         matchedSkills
       };
     })
+    .filter(job => job !== null)
     .sort((a, b) => b.matchPercentage - a.matchPercentage)
     .slice(0, 5);
 
