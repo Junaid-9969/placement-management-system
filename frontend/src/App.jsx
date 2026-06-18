@@ -33,6 +33,7 @@ import CompanyProfile from './pages/company/CompanyProfile';
 import CompanyJobs from './pages/company/CompanyJobs';
 import CompanyApplications from './pages/company/CompanyApplications';
 import PostJob from './pages/company/PostJob';
+import StudentDetails from './pages/company/StudentDetails';
 
 // Trainer pages
 import TrainerDashboard from './pages/trainer/TrainerDashboard';
@@ -100,11 +101,16 @@ export default function App() {
 
           {/* Company */}
           <Route path="/company" element={<ProtectedRoute roles={['company']}><DashboardLayout /></ProtectedRoute>}>
+    
             <Route index element={<CompanyDashboard />} />
             <Route path="profile" element={<CompanyProfile />} />
             <Route path="jobs" element={<CompanyJobs />} />
             <Route path="jobs/post" element={<PostJob />} />
             <Route path="applications" element={<CompanyApplications />} />
+                  <Route
+  path="students/:id"
+  element={<StudentDetails />}
+/>
             <Route path="settings" element={<SettingsPage />} />
           </Route>
 

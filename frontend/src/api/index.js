@@ -85,6 +85,8 @@ export const companyAPI = {
   getProfile: () => api.get('/companies/profile'),
   updateProfile: (data) => api.put('/companies/profile', data),
   getDashboard: () => api.get('/companies/dashboard'),
+  getRecommendedStudents: (jobId) =>
+  api.get(`/students/recommended/${jobId}`),
   getAll: (params) => api.get('/companies', { params }),
   getById: (id) => api.get(`/companies/${id}`),
   verify: (id) => api.put(`/companies/${id}/verify`),

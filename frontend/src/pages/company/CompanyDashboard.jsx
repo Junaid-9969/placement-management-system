@@ -12,8 +12,12 @@ export default function CompanyDashboard() {
   });
 
   if (isLoading) return <PageLoader />;
-  const { stats, recentApplications, company } = data || {};
-
+const {
+  stats,
+  recentApplications,
+  company,
+  recommendedStudents
+} = data || {};
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between">
@@ -97,6 +101,68 @@ export default function CompanyDashboard() {
           </div>
         </div>
       </div>
+      {/* Recommended Students */}
+<div className="card p-5">
+  <div className="flex items-center justify-between mb-4">
+    <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+      Recommended Students
+    </h3>
+  </div>
+
+  {recommendedStudents?.length ? (
+    <div className="space-y-3">
+      {recommendedStudents.map(student => (
+        <div
+          key={student._id}
+          className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3 last:border-0"
+        >
+          <div>
+            <h4 className="font-medium text-gray-800 dark:text-gray-200">
+              {student.firstName} {student.lastName}
+            </h4>
+
+            <p className="text-sm text-gray-500">
+              {student.branch} • CGPA {student.cgpa}
+            </p>
+
+            <div className="flex gap-1 mt-2 flex-wrap">
+              {student.matchedSkills?.map(skill => (
+                <span
+                  key={skill}
+                  className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full"
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-right space-y-2">
+  <p className="font-bold text-green-600">
+    {student.matchPercentage}%
+  </p>
+
+  <p className="text-xs text-gray-500">
+    Match
+  </p>
+
+  <Link
+  to={`/company/students/${student._id}`}
+
+    className="btn-secondary text-xs"
+  >
+    View Profile
+  </Link>
+</div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p className="text-sm text-gray-500">
+      No recommended students available.
+    </p>
+  )}
+</div>
     </div>
   );
 }
