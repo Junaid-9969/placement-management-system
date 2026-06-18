@@ -148,37 +148,108 @@ exports.deleteStudent = async (req, res) => {
 exports.getStudentDashboard = async (req, res) => {
   const Application = require('../models/Application');
   const Job = require('../models/Job');
-  
+
   const student = await Student.findOne({ user: req.user._id });
+
   if (!student) {
-    return res.status(404).json({ success: false, message: 'Profile not found.' });
+    return res.status(404).json({
+      success: false,
+      message: 'Profile not found.'
+    });
   }
-  
-  const [applications, activeJobs, recentApplications] = await Promise.all([
+
+  const [applications, recentApplications] = await Promise.all([
     Application.find({ student: student._id }),
-    Job.countDocuments({ status: 'active', isApproved: true, deadline: { $gte: new Date() } }),
     Application.find({ student: student._id })
       .populate('job', 'title deadline')
       .populate('company', 'companyName logo')
       .sort({ createdAt: -1 })
       .limit(5)
   ]);
-  
+
+  const appliedJobIds = applications.map(app => app.job);
+
+  const availableJobs = await Job.find({
+    status: 'active',
+    isApproved: true,
+    deadline: { $gte: new Date() },
+    _id: { $nin: appliedJobIds }
+  })
+    .populate('company', 'companyName logo')
+    .limit(50);
+
+  const recommendedJobs = availableJobs
+    .map(job => {
+      let score = 0;
+
+      const studentSkills =
+        student.skills?.map(skill => skill.toLowerCase()) || [];
+
+      const jobSkills =
+        job.requiredSkills?.map(skill => skill.toLowerCase()) || [];
+
+      const matchedSkills = jobSkills.filter(skill =>
+        studentSkills.includes(skill)
+      );
+
+      const skillMatch =
+        jobSkills.length > 0
+          ? (matchedSkills.length / jobSkills.length) * 70
+          : 0;
+
+      score += skillMatch;
+
+      const branchEligible =
+        job.eligibility?.allowedBranches?.includes('ALL') ||
+        job.eligibility?.allowedBranches?.includes(student.branch);
+
+      if (branchEligible) score += 10;
+
+      if (
+        student.cgpa >=
+        (job.eligibility?.minCGPA || 0)
+      ) {
+        score += 20;
+      }
+
+      return {
+        _id: job._id,
+        title: job.title,
+        location: job.location,
+        company: job.company,
+        matchPercentage: Math.round(score),
+        matchedSkills
+      };
+    })
+    .sort((a, b) => b.matchPercentage - a.matchPercentage)
+    .slice(0, 5);
+
+  const activeJobs = availableJobs.length;
+
   const stats = {
     totalApplications: applications.length,
     applied: applications.filter(a => a.status === 'applied').length,
     shortlisted: applications.filter(a => a.status === 'shortlisted').length,
     selected: applications.filter(a => a.status === 'selected').length,
     rejected: applications.filter(a => a.status === 'rejected').length,
-    interviewScheduled: applications.filter(a => a.status === 'interview_scheduled').length,
+    interviewScheduled: applications.filter(
+      a => a.status === 'interview_scheduled'
+    ).length,
     activeJobs,
     profileCompleteness: calculateProfileCompleteness(student),
     readinessScore: student.readinessScore
   };
-  
-  res.json({ success: true, data: { stats, recentApplications, student } });
-};
 
+  res.json({
+    success: true,
+    data: {
+      stats,
+      recentApplications,
+      student,
+      recommendedJobs
+    }
+  });
+};
 function calculateProfileCompleteness(student) {
   const fields = ['phone', 'cgpa', 'skills', 'resumeUrl', 'githubUrl', 'linkedinUrl', 'projects'];
   const filled = fields.filter(f => {
