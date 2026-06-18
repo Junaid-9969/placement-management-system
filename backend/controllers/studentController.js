@@ -262,3 +262,85 @@ function calculateProfileCompleteness(student) {
   });
   return Math.round((filled.length / fields.length) * 100);
 }
+exports.getRecommendedStudentsForJob = async (req, res) => {
+  const Job = require('../models/Job');
+  const Company = require('../models/Company');
+
+  const company = await Company.findOne({
+    user: req.user._id
+  });
+
+  if (!company) {
+    return res.status(404).json({
+      success: false,
+      message: 'Company not found'
+    });
+  }
+
+  const job = await Job.findById(req.params.jobId);
+
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      message: 'Job not found'
+    });
+  }
+
+  const students = await Student.find({
+    placementStatus: 'not_placed'
+  });
+
+  const recommendations = students
+    .map(student => {
+
+      let score = 0;
+
+      const studentSkills =
+        student.skills?.map(s => s.toLowerCase()) || [];
+
+      const jobSkills =
+        job.requiredSkills?.map(s => s.toLowerCase()) || [];
+
+      const matchedSkills =
+        jobSkills.filter(skill =>
+          studentSkills.includes(skill)
+        );
+
+      if (jobSkills.length > 0) {
+        score +=
+          (matchedSkills.length /
+            jobSkills.length) * 70;
+      }
+
+      const branchMatch =
+        job.eligibility?.allowedBranches?.includes('ALL') ||
+        job.eligibility?.allowedBranches?.includes(student.branch);
+
+      if (branchMatch) score += 10;
+
+      if (
+        student.cgpa >=
+        (job.eligibility?.minCGPA || 0)
+      ) {
+        score += 20;
+      }
+
+      return {
+        _id: student._id,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        branch: student.branch,
+        cgpa: student.cgpa,
+        skills: student.skills,
+        matchedSkills,
+        matchPercentage: Math.round(score)
+      };
+    })
+.filter(student => student.matchedSkills.length > 0)    .sort((a, b) => b.matchPercentage - a.matchPercentage)
+    .slice(0, 20);
+
+  res.json({
+    success: true,
+    data: recommendations
+  });
+};

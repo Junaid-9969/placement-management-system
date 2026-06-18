@@ -75,7 +75,9 @@ export const studentAPI = {
   getDashboard: () => api.get('/students/dashboard'),
   getAll: (params) => api.get('/students', { params }),
   getById: (id) => api.get(`/students/${id}`),
-  delete: (id) => api.delete(`/students/${id}`)
+  delete: (id) => api.delete(`/students/${id}`),
+  getRecommendedStudents: (jobId) =>
+  api.get(`/students/recommended/${jobId}`),
 };
 
 // Company API
