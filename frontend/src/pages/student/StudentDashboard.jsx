@@ -31,8 +31,7 @@ const {
             Welcome back, {student?.firstName}! 👋
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-            {student?.branch} • CGPA: {student?.cgpa || 'Not set'} • {student?.college || 'Your College'}
-          </p>
+{student?.branch} • CGPA: {student?.cgpa || 'Not set'} • {student?.college || 'Your College'}          </p>
         </div>
         <Link to="/student/jobs" className="btn-primary">
           <Briefcase size={16} /> Browse Jobs

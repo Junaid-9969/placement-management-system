@@ -27,6 +27,7 @@ export default function StudentProfile() {
         firstName: profileData.firstName || '',
         lastName: profileData.lastName || '',
         phone: profileData.phone || '',
+        college: profileData.college || '',
         branch: profileData.branch || '',
         cgpa: profileData.cgpa || '',
         rollNumber: profileData.rollNumber || '',
@@ -123,6 +124,13 @@ export default function StudentProfile() {
             <FormField label="Graduation Year">
               <input {...register('graduationYear')} type="number" className="input" placeholder="2025" />
             </FormField>
+            <FormField label="College Name">
+  <input
+    {...register('college')}
+    className="input"
+    placeholder="Enter College Name"
+  />
+</FormField>
             <FormField label="10th Percentage">
               <input {...register('tenthPercent')} type="number" step="0.01" min="0" max="100" className="input" />
             </FormField>

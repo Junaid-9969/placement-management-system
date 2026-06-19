@@ -1,6 +1,7 @@
 const Student = require('../models/Student');
 const User = require('../models/User');
-
+const Application = require('../models/Application');
+const Trainer = require('../models/Trainer');
 /**
  * @swagger
  * /api/students/profile:
@@ -128,14 +129,41 @@ exports.getStudentById = async (req, res) => {
  */
 exports.deleteStudent = async (req, res) => {
   const student = await Student.findById(req.params.id);
+
   if (!student) {
-    return res.status(404).json({ success: false, message: 'Student not found.' });
+    return res.status(404).json({
+      success: false,
+      message: 'Student not found.'
+    });
   }
-  
+
+  // Remove from trainer
+  if (student.assignedTrainer) {
+    await Trainer.findByIdAndUpdate(
+      student.assignedTrainer,
+      {
+        $pull: {
+          assignedStudents: student._id
+        }
+      }
+    );
+  }
+
+  // Delete all applications
+  await Application.deleteMany({
+    student: student._id
+  });
+
+  // Delete user account
   await User.findByIdAndDelete(student.user);
+
+  // Delete student profile
   await student.deleteOne();
-  
-  res.json({ success: true, message: 'Student deleted successfully.' });
+
+  res.json({
+    success: true,
+    message: 'Student deleted successfully.'
+  });
 };
 
 /**
