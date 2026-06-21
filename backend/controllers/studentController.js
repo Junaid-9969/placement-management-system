@@ -360,6 +360,11 @@ exports.getRecommendedStudentsForJob = async (req, res) => {
         branch: student.branch,
         cgpa: student.cgpa,
         skills: student.skills,
+          resumeUrl: student.resumeUrl,
+  githubUrl: student.githubUrl,
+  linkedinUrl: student.linkedinUrl,
+  portfolioUrl: student.portfolioUrl,
+
         matchedSkills,
         matchPercentage: Math.round(score)
       };

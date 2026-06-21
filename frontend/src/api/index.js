@@ -147,5 +147,7 @@ export const analyticsAPI = {
 export const uploadAPI = {
   uploadResume: (formData) => api.post('/upload/resume', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   uploadCertificate: (formData) => api.post('/upload/certificate', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  uploadProfilePic: (formData) => api.post('/upload/profile-pic', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+  uploadProfilePic: (formData) => api.post('/upload/profile-pic', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  deleteResume: () =>
+  api.delete('/upload/resume'),
 };

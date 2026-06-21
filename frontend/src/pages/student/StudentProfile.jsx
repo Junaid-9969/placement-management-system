@@ -49,6 +49,18 @@ export default function StudentProfile() {
     onSuccess: () => { toast.success('Profile updated!'); qc.invalidateQueries(['student-profile']); },
     onError: (err) => toast.error(err.response?.data?.message || 'Update failed')
   });
+  const deleteResumeMutation = useMutation({
+  mutationFn: uploadAPI.deleteResume,
+
+  onSuccess: () => {
+    toast.success('Resume deleted');
+    qc.invalidateQueries(['student-profile']);
+  },
+
+  onError: () => {
+    toast.error('Failed to delete resume');
+  }
+});
 
   const handleResumeUpload = async (e) => {
     const file = e.target.files[0];
@@ -197,16 +209,43 @@ export default function StudentProfile() {
         <div className="card p-5">
           <h2 className="font-semibold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b border-gray-100 dark:border-gray-700">Resume</h2>
           {profileData?.resumeUrl && (
-            <div className="flex items-center gap-3 mb-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <div className="w-8 h-8 bg-green-100 dark:bg-green-900/40 rounded-lg flex items-center justify-center">
-                <Upload size={16} className="text-green-600" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-green-700 dark:text-green-400">Resume uploaded</p>
-                <a href={profileData.resumeUrl} target="_blank" rel="noreferrer" className="text-xs text-green-600 hover:underline">View current resume</a>
-              </div>
-            </div>
-          )}
+  <div className="flex items-center justify-between mb-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+    
+    <div className="flex items-center gap-3">
+      <div className="w-8 h-8 bg-green-100 dark:bg-green-900/40 rounded-lg flex items-center justify-center">
+        <Upload size={16} className="text-green-600" />
+      </div>
+
+      <div>
+        <p className="text-sm font-medium text-green-700 dark:text-green-400">
+          Resume uploaded
+        </p>
+
+        <a
+          href={profileData.resumeUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="text-xs text-green-600 hover:underline"
+        >
+          View Resume
+        </a>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      onClick={() => {
+        if (window.confirm('Delete this resume?')) {
+          deleteResumeMutation.mutate();
+        }
+      }}
+      className="px-3 py-1 bg-red-500 text-white rounded-md text-sm hover:bg-red-600"
+    >
+      Delete
+    </button>
+
+  </div>
+)}
           <label className="cursor-pointer">
             <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors">
               <Upload size={24} className="mx-auto mb-2 text-gray-400" />

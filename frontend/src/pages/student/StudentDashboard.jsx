@@ -57,7 +57,66 @@ const {
           </Link>
         )}
       </div>
+     {(
+  student?.githubUrl ||
+  student?.linkedinUrl ||
+  student?.portfolioUrl ||
+  student?.resumeUrl
+) && (
+  <div className="card p-5">
+    <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">
+      Documents & Links
+    </h3>
 
+    <div className="flex flex-wrap gap-3">
+
+      {student?.githubUrl && (
+        <a
+          href={student.githubUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-primary"
+        >
+          GitHub
+        </a>
+      )}
+
+      {student?.linkedinUrl && (
+        <a
+          href={student.linkedinUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-primary"
+        >
+          LinkedIn
+        </a>
+      )}
+
+      {student?.portfolioUrl && (
+        <a
+          href={student.portfolioUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-primary"
+        >
+          Portfolio
+        </a>
+      )}
+
+      {student?.resumeUrl && (
+        <a
+          href={student.resumeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-primary"
+        >
+          Resume
+        </a>
+      )}
+
+    </div>
+  </div>
+)}
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard title="Active Jobs" value={stats?.activeJobs || 0} icon={Briefcase} color="blue" subtitle="Available now" />

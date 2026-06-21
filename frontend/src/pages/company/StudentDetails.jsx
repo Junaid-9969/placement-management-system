@@ -17,6 +17,7 @@ export default function StudentDetails() {
   }
 
   const student = data;
+  
 
   return (
     <div className="space-y-6">
@@ -32,6 +33,63 @@ export default function StudentDetails() {
         <p>Email: {student.user?.email}</p>
 
         <hr className="my-4" />
+        
+        <h2 className="font-semibold mb-2">
+  Documents & Links
+</h2>
+
+
+<div className="space-y-2 mb-4">
+
+<div className="flex flex-wrap gap-3">
+  {student.resumeUrl && (
+    <a
+      href={`http://localhost:5000${student.resumeUrl}`}
+      target="_blank"
+      rel="noreferrer"
+      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+    >
+      📄 View Resume
+    </a>
+  )}
+
+  {student.githubUrl && (
+    <a
+      href={student.githubUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 text-sm"
+    >
+      🔗 GitHub
+    </a>
+  )}
+
+  {student.linkedinUrl && (
+    <a
+      href={student.linkedinUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm"
+    >
+      💼 LinkedIn
+    </a>
+  )}
+
+  {student.portfolioUrl && (
+    <a
+      href={student.portfolioUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+    >
+      🌐 Portfolio
+    </a>
+  )}
+</div>
+
+</div>
+
+<hr className="my-4" />
 
         <h2 className="font-semibold mb-2">
           Skills

@@ -3,8 +3,18 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { companyAPI } from '../../api';
 import { StatCard, PageLoader, StatusBadge, PageHeader, EmptyState } from '../../components/common';
-import { Briefcase, FileText, Users, CheckCircle, Plus, Clock } from 'lucide-react';
-
+import {
+  Briefcase,
+  FileText,
+  Users,
+  CheckCircle,
+  Plus,
+  Clock,
+  Github,
+  Linkedin,
+  Globe,
+  FileDown
+} from 'lucide-react';
 export default function CompanyDashboard() {
   const { data, isLoading } = useQuery({
     queryKey: ['company-dashboard'],
@@ -135,6 +145,57 @@ const {
                 </span>
               ))}
             </div>
+            <div className="flex flex-wrap gap-2 mt-3">
+
+  {student.resumeUrl && (
+    <a
+      href={student.resumeUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="btn-primary text-xs"
+    >
+      <FileDown size={12} />
+      Resume
+    </a>
+  )}
+
+  {student.githubUrl && (
+    <a
+      href={student.githubUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="btn-primary text-xs"
+    >
+      <Github size={12} />
+      GitHub
+    </a>
+  )}
+
+  {student.linkedinUrl && (
+    <a
+      href={student.linkedinUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="btn-primary text-xs"
+    >
+      <Linkedin size={12} />
+      LinkedIn
+    </a>
+  )}
+
+  {student.portfolioUrl && (
+    <a
+      href={student.portfolioUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="btn-primary text-xs"
+    >
+      <Globe size={12} />
+      Portfolio
+    </a>
+  )}
+
+</div>
           </div>
 
           <div className="text-right space-y-2">
