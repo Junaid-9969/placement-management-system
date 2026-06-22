@@ -1,9 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authAPI } from '../api';
+import { useQueryClient } from '@tanstack/react-query';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
+  const queryClient = useQueryClient();
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
@@ -27,24 +30,31 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => { initAuth(); }, [initAuth]);
 
   const login = async (credentials) => {
+    
     const res = await authAPI.login(credentials);
     const { accessToken, refreshToken, user: userData } = res.data;
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
+    queryClient.clear();
+
     setUser(userData);
     setNotifications(userData.notifications || []);
     return userData;
   };
 
   const logout = async () => {
-    try {
-      const refreshToken = localStorage.getItem('refreshToken');
-      await authAPI.logout({ refreshToken });
-    } catch {}
-    localStorage.clear();
-    setUser(null);
-    setNotifications([]);
-  };
+  try {
+    const refreshToken = localStorage.getItem('refreshToken');
+    await authAPI.logout({ refreshToken });
+  } catch {}
+
+  localStorage.clear();
+
+  queryClient.clear();
+
+  setUser(null);
+  setNotifications([]);
+};
 
   const refreshNotifications = async () => {
     try {

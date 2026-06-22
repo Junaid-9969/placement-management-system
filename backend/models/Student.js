@@ -37,7 +37,7 @@ const studentSchema = new mongoose.Schema({
   degree: { type: String, default: 'B.Tech' },
   tenthPercent: Number,
   twelfthPercent: Number,
-
+  
   // Skills & Projects
   skills: [{ type: String, trim: true }],
   projects: [{

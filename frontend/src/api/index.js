@@ -75,7 +75,9 @@ export const studentAPI = {
   getDashboard: () => api.get('/students/dashboard'),
   getAll: (params) => api.get('/students', { params }),
   getById: (id) => api.get(`/students/${id}`),
-  delete: (id) => api.delete(`/students/${id}`)
+  delete: (id) => api.delete(`/students/${id}`),
+  getRecommendedStudents: (jobId) =>
+  api.get(`/students/recommended/${jobId}`),
 };
 
 // Company API
@@ -83,6 +85,8 @@ export const companyAPI = {
   getProfile: () => api.get('/companies/profile'),
   updateProfile: (data) => api.put('/companies/profile', data),
   getDashboard: () => api.get('/companies/dashboard'),
+  getRecommendedStudents: (jobId) =>
+  api.get(`/students/recommended/${jobId}`),
   getAll: (params) => api.get('/companies', { params }),
   getById: (id) => api.get(`/companies/${id}`),
   verify: (id) => api.put(`/companies/${id}/verify`),
@@ -143,5 +147,7 @@ export const analyticsAPI = {
 export const uploadAPI = {
   uploadResume: (formData) => api.post('/upload/resume', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   uploadCertificate: (formData) => api.post('/upload/certificate', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  uploadProfilePic: (formData) => api.post('/upload/profile-pic', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+  uploadProfilePic: (formData) => api.post('/upload/profile-pic', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  deleteResume: () =>
+  api.delete('/upload/resume'),
 };

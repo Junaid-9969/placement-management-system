@@ -1,3 +1,4 @@
+import { useAuth } from '../../context/AuthContext';
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -6,13 +7,21 @@ import { StatCard, PageLoader, StatusBadge, PageHeader, EmptyState } from '../..
 import { Briefcase, FileText, CheckCircle, XCircle, Clock, TrendingUp, User, ChevronRight } from 'lucide-react';
 
 export default function StudentDashboard() {
-  const { data, isLoading } = useQuery({
-    queryKey: ['student-dashboard'],
-    queryFn: () => studentAPI.getDashboard().then(r => r.data.data)
-  });
+  const { user } = useAuth();
+
+const { data, isLoading } = useQuery({
+  queryKey: ['student-dashboard', user?._id],
+  queryFn: () => studentAPI.getDashboard().then(r => r.data.data),
+  enabled: !!user
+});
 
   if (isLoading) return <PageLoader />;
-  const { stats, recentApplications, student } = data || {};
+const {
+  stats,
+  recentApplications,
+  student,
+  recommendedJobs
+} = data || {};
 
   return (
     <div className="space-y-6">
@@ -22,8 +31,7 @@ export default function StudentDashboard() {
             Welcome back, {student?.firstName}! 👋
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-            {student?.branch} • CGPA: {student?.cgpa || 'Not set'} • {student?.college || 'Your College'}
-          </p>
+{student?.branch} • CGPA: {student?.cgpa || 'Not set'} • {student?.college || 'Your College'}          </p>
         </div>
         <Link to="/student/jobs" className="btn-primary">
           <Briefcase size={16} /> Browse Jobs
@@ -49,7 +57,66 @@ export default function StudentDashboard() {
           </Link>
         )}
       </div>
+     {(
+  student?.githubUrl ||
+  student?.linkedinUrl ||
+  student?.portfolioUrl ||
+  student?.resumeUrl
+) && (
+  <div className="card p-5">
+    <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">
+      Documents & Links
+    </h3>
 
+    <div className="flex flex-wrap gap-3">
+
+      {student?.githubUrl && (
+        <a
+          href={student.githubUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-primary"
+        >
+          GitHub
+        </a>
+      )}
+
+      {student?.linkedinUrl && (
+        <a
+          href={student.linkedinUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-primary"
+        >
+          LinkedIn
+        </a>
+      )}
+
+      {student?.portfolioUrl && (
+        <a
+          href={student.portfolioUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-primary"
+        >
+          Portfolio
+        </a>
+      )}
+
+      {student?.resumeUrl && (
+        <a
+          href={student.resumeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-primary"
+        >
+          Resume
+        </a>
+      )}
+
+    </div>
+  </div>
+)}
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard title="Active Jobs" value={stats?.activeJobs || 0} icon={Briefcase} color="blue" subtitle="Available now" />
@@ -113,6 +180,62 @@ export default function StudentDashboard() {
             )}
           </div>
         </div>
+        {/* Recommended Jobs */}
+{recommendedJobs?.length > 0 && (
+  <div className="card p-5">
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+        Recommended Jobs For You
+      </h3>
+      <Link
+        to="/student/jobs"
+        className="text-xs text-primary-600 hover:text-primary-700"
+      >
+        View All
+      </Link>
+    </div>
+
+    <div className="space-y-3">
+      {recommendedJobs.map(job => (
+        <div
+          key={job._id}
+          className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3 last:border-0"
+        >
+          <div>
+            <h4 className="font-medium text-gray-800 dark:text-gray-200">
+              {job.title}
+            </h4>
+
+            <p className="text-sm text-gray-500">
+              {job.company?.companyName}
+            </p>
+
+            <p className="text-xs text-primary-600 mt-1">
+  Match Score: {job.matchPercentage}%
+</p>
+<div className="flex flex-wrap gap-1 mt-2">
+  {job.matchedSkills?.slice(0, 3).map((skill, index) => (
+    <span
+      key={index}
+      className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full"
+    >
+      {skill}
+    </span>
+  ))}
+</div>
+          </div>
+
+          <Link
+            to={`/student/jobs/${job._id}`}
+            className="btn-secondary text-sm"
+          >
+            View Job
+          </Link>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
       </div>
 
       {/* Trainer feedback */}

@@ -1,6 +1,7 @@
 const Student = require('../models/Student');
 const User = require('../models/User');
-
+const Application = require('../models/Application');
+const Trainer = require('../models/Trainer');
 /**
  * @swagger
  * /api/students/profile:
@@ -128,14 +129,41 @@ exports.getStudentById = async (req, res) => {
  */
 exports.deleteStudent = async (req, res) => {
   const student = await Student.findById(req.params.id);
+
   if (!student) {
-    return res.status(404).json({ success: false, message: 'Student not found.' });
+    return res.status(404).json({
+      success: false,
+      message: 'Student not found.'
+    });
   }
-  
+
+  // Remove from trainer
+  if (student.assignedTrainer) {
+    await Trainer.findByIdAndUpdate(
+      student.assignedTrainer,
+      {
+        $pull: {
+          assignedStudents: student._id
+        }
+      }
+    );
+  }
+
+  // Delete all applications
+  await Application.deleteMany({
+    student: student._id
+  });
+
+  // Delete user account
   await User.findByIdAndDelete(student.user);
+
+  // Delete student profile
   await student.deleteOne();
-  
-  res.json({ success: true, message: 'Student deleted successfully.' });
+
+  res.json({
+    success: true,
+    message: 'Student deleted successfully.'
+  });
 };
 
 /**
@@ -148,37 +176,112 @@ exports.deleteStudent = async (req, res) => {
 exports.getStudentDashboard = async (req, res) => {
   const Application = require('../models/Application');
   const Job = require('../models/Job');
-  
+
   const student = await Student.findOne({ user: req.user._id });
+
   if (!student) {
-    return res.status(404).json({ success: false, message: 'Profile not found.' });
+    return res.status(404).json({
+      success: false,
+      message: 'Profile not found.'
+    });
   }
-  
-  const [applications, activeJobs, recentApplications] = await Promise.all([
+
+  const [applications, recentApplications] = await Promise.all([
     Application.find({ student: student._id }),
-    Job.countDocuments({ status: 'active', isApproved: true, deadline: { $gte: new Date() } }),
     Application.find({ student: student._id })
       .populate('job', 'title deadline')
       .populate('company', 'companyName logo')
       .sort({ createdAt: -1 })
       .limit(5)
   ]);
-  
+
+  const appliedJobIds = applications.map(app => app.job);
+
+  const availableJobs = await Job.find({
+    status: 'active',
+    isApproved: true,
+    deadline: { $gte: new Date() },
+    _id: { $nin: appliedJobIds }
+  })
+    .populate('company', 'companyName logo')
+    .limit(50);
+
+  const recommendedJobs = availableJobs
+    .map(job => {
+      let score = 0;
+
+      const studentSkills =
+        student.skills?.map(skill => skill.toLowerCase()) || [];
+
+      const jobSkills =
+        job.requiredSkills?.map(skill => skill.toLowerCase()) || [];
+
+      const matchedSkills = jobSkills.filter(skill =>
+        studentSkills.includes(skill)
+      );
+      if (matchedSkills.length === 0) {
+  return null;
+}
+
+      const skillMatch =
+        jobSkills.length > 0
+          ? (matchedSkills.length / jobSkills.length) * 70
+          : 0;
+
+      score += skillMatch;
+
+      const branchEligible =
+        job.eligibility?.allowedBranches?.includes('ALL') ||
+        job.eligibility?.allowedBranches?.includes(student.branch);
+
+      if (branchEligible) score += 10;
+
+      if (
+        student.cgpa >=
+        (job.eligibility?.minCGPA || 0)
+      ) {
+        score += 20;
+      }
+
+      return {
+        _id: job._id,
+        title: job.title,
+        location: job.location,
+        company: job.company,
+        matchPercentage: Math.round(score),
+        matchedSkills
+      };
+    })
+    .filter(job => job !== null)
+    .sort((a, b) => b.matchPercentage - a.matchPercentage)
+    .slice(0, 5);
+
+  const activeJobs = availableJobs.length;
+
   const stats = {
     totalApplications: applications.length,
     applied: applications.filter(a => a.status === 'applied').length,
     shortlisted: applications.filter(a => a.status === 'shortlisted').length,
     selected: applications.filter(a => a.status === 'selected').length,
     rejected: applications.filter(a => a.status === 'rejected').length,
-    interviewScheduled: applications.filter(a => a.status === 'interview_scheduled').length,
+    interviewScheduled: applications.filter(
+      a => a.status === 'interview_scheduled'
+    ).length,
     activeJobs,
     profileCompleteness: calculateProfileCompleteness(student),
     readinessScore: student.readinessScore
   };
-  
-  res.json({ success: true, data: { stats, recentApplications, student } });
-};
 
+  res.json({
+    success: true,
+    data: {
+      stats,
+      recentApplications,
+      student,
+      recommendedJobs
+    }
+  });
+};
 function calculateProfileCompleteness(student) {
   const fields = ['phone', 'cgpa', 'skills', 'resumeUrl', 'githubUrl', 'linkedinUrl', 'projects'];
   const filled = fields.filter(f => {
@@ -187,3 +290,90 @@ function calculateProfileCompleteness(student) {
   });
   return Math.round((filled.length / fields.length) * 100);
 }
+exports.getRecommendedStudentsForJob = async (req, res) => {
+  const Job = require('../models/Job');
+  const Company = require('../models/Company');
+
+  const company = await Company.findOne({
+    user: req.user._id
+  });
+
+  if (!company) {
+    return res.status(404).json({
+      success: false,
+      message: 'Company not found'
+    });
+  }
+
+  const job = await Job.findById(req.params.jobId);
+
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      message: 'Job not found'
+    });
+  }
+
+  const students = await Student.find({
+    placementStatus: 'not_placed'
+  });
+
+  const recommendations = students
+    .map(student => {
+
+      let score = 0;
+
+      const studentSkills =
+        student.skills?.map(s => s.toLowerCase()) || [];
+
+      const jobSkills =
+        job.requiredSkills?.map(s => s.toLowerCase()) || [];
+
+      const matchedSkills =
+        jobSkills.filter(skill =>
+          studentSkills.includes(skill)
+        );
+
+      if (jobSkills.length > 0) {
+        score +=
+          (matchedSkills.length /
+            jobSkills.length) * 70;
+      }
+
+      const branchMatch =
+        job.eligibility?.allowedBranches?.includes('ALL') ||
+        job.eligibility?.allowedBranches?.includes(student.branch);
+
+      if (branchMatch) score += 10;
+
+      if (
+        student.cgpa >=
+        (job.eligibility?.minCGPA || 0)
+      ) {
+        score += 20;
+      }
+
+      return {
+        _id: student._id,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        branch: student.branch,
+        cgpa: student.cgpa,
+        skills: student.skills,
+          resumeUrl: student.resumeUrl,
+  githubUrl: student.githubUrl,
+  linkedinUrl: student.linkedinUrl,
+  portfolioUrl: student.portfolioUrl,
+
+        matchedSkills,
+        matchPercentage: Math.round(score)
+      };
+    })
+.filter(student => student.matchedSkills.length > 0)    .sort((a, b) => b.matchPercentage - a.matchPercentage)
+    .slice(0, 20);
+
+  res.json({
+    success: true,
+    data: recommendations
+  });
+};
