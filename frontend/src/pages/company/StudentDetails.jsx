@@ -17,6 +17,11 @@ export default function StudentDetails() {
   }
 
   const student = data;
+  const hasDocuments =
+  student?.resumeUrl ||
+  student?.githubUrl ||
+  student?.linkedinUrl ||
+  student?.portfolioUrl;
   
 
   return (
@@ -32,62 +37,67 @@ export default function StudentDetails() {
 
         <p>Email: {student.user?.email}</p>
 
-        <hr className="my-4" />
-        
-        <h2 className="font-semibold mb-2">
+<hr className="my-4" />
+
+<h2 className="font-semibold mb-3">
   Documents & Links
 </h2>
 
+{!hasDocuments ? (
+  <div className="p-4 border rounded-lg bg-gray-50 text-gray-500 text-sm">
+    No documents or links uploaded yet.
+  </div>
+) : (
+  <div className="flex flex-wrap gap-3">
 
-<div className="space-y-2 mb-4">
+    {student.resumeUrl && (
+      <a
+        href={`http://localhost:5000${student.resumeUrl}`}
+        target="_blank"
+        rel="noreferrer"
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+      >
+        📄 Resume
+      </a>
+    )}
 
-<div className="flex flex-wrap gap-3">
-  {student.resumeUrl && (
-    <a
-      href={`http://localhost:5000${student.resumeUrl}`}
-      target="_blank"
-      rel="noreferrer"
-      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-    >
-      📄 View Resume
-    </a>
-  )}
+    {student.githubUrl && (
+      <a
+        href={student.githubUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+      >
+        🔗 GitHub
 
-  {student.githubUrl && (
-    <a
-      href={student.githubUrl}
-      target="_blank"
-      rel="noreferrer"
-      className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 text-sm"
-    >
-      🔗 GitHub
-    </a>
-  )}
+      </a>
+    )}
 
-  {student.linkedinUrl && (
-    <a
-      href={student.linkedinUrl}
-      target="_blank"
-      rel="noreferrer"
-      className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm"
-    >
-      💼 LinkedIn
-    </a>
-  )}
+    {student.linkedinUrl && (
+      <a
+        href={student.linkedinUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+      >
+        💼 LinkedIn
+      </a>
+    )}
 
-  {student.portfolioUrl && (
-    <a
-      href={student.portfolioUrl}
-      target="_blank"
-      rel="noreferrer"
-      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
-    >
-      🌐 Portfolio
-    </a>
-  )}
-</div>
+    {student.portfolioUrl && (
+      <a
+        href={student.portfolioUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+      >
+         🌐 Portfolio
 
-</div>
+      </a>
+    )}
+
+  </div>
+)}
 
 <hr className="my-4" />
 
@@ -99,7 +109,11 @@ export default function StudentDetails() {
           {student.skills?.map(skill => (
             <span
               key={skill}
-              className="px-3 py-1 bg-blue-100 rounded-full text-sm"
+              className=" px-3 py-1 rounded-full text-sm font-medium
+      border
+      bg-blue-50 text-blue-700 border-blue-200
+      dark:bg-slate-800 dark:text-cyan-300 dark:border-slate-600
+    "
             >
               {skill}
             </span>

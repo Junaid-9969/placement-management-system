@@ -139,7 +139,11 @@ const {
               {student.matchedSkills?.map(skill => (
                 <span
                   key={skill}
-                  className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full"
+                  className=" px-3 py-1 rounded-full text-sm font-medium
+      border
+      bg-blue-50 text-blue-700 border-blue-200
+      dark:bg-slate-800 dark:text-cyan-300 dark:border-slate-600
+    "
                 >
                   {skill}
                 </span>
