@@ -95,16 +95,7 @@ in your browser.
 
 ---
 
-## Demo Credentials
 
-| Role    | Email                                                   | Password     |
-| ------- | ------------------------------------------------------- | ------------ |
-| Admin   | [admin@placement.com](mailto:admin@placement.com)       | Admin@1234   |
-| Trainer | [trainer@placement.com](mailto:trainer@placement.com)   | Trainer@1234 |
-| Company | [company1@placement.com](mailto:company1@placement.com) | Company@1234 |
-| Student | [student1@placement.com](mailto:student1@placement.com) | Student@1234 |
-
----
 
 ## Project Features
 
