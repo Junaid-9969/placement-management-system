@@ -63,20 +63,38 @@ export default function StudentProfile() {
 });
 
   const handleResumeUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error('File too large. Max 5MB.'); return; }
-    const formData = new FormData();
-    formData.append('resume', file);
-    setUploading(true);
-    try {
-      await uploadAPI.uploadResume(formData);
-      toast.success('Resume uploaded!');
-      qc.invalidateQueries(['student-profile']);
-    } catch { toast.error('Upload failed'); }
-    finally { setUploading(false); }
-  };
+  const file = e.target.files[0];
+  if (!file) return;
 
+  if (file.size > 5 * 1024 * 1024) {
+    toast.error('File too large. Max 5MB.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('resume', file);
+
+  setUploading(true);
+
+  try {
+    const res = await uploadAPI.uploadResume(formData);
+
+    toast.success('Resume uploaded!');
+
+    console.log("Upload Response:", res.data);
+
+    // ✅ IMPORTANT FIX: refresh BOTH places where resume is used
+    await qc.invalidateQueries({ queryKey: ['student-profile'] });
+
+    await qc.invalidateQueries({ queryKey: ['student-dashboard'] });
+
+  } catch (err) {
+    console.error(err);
+    toast.error('Upload failed');
+  } finally {
+    setUploading(false);
+  }
+};
   const addSkill = () => {
     const skill = skillInput.trim();
     if (skill && !skills.includes(skill)) {
