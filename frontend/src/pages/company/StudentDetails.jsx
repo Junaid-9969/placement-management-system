@@ -60,7 +60,7 @@ export default function StudentDetails() {
         📄 Resume
       </a>
     )}
-
+ 
     {student.githubUrl && (
       <a
         href={student.githubUrl}
@@ -144,3 +144,7 @@ export default function StudentDetails() {
     </div>
   );
 }
+
+
+
+

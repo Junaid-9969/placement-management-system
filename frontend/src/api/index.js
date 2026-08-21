@@ -151,3 +151,4 @@ export const uploadAPI = {
   deleteResume: () =>
   api.delete('/upload/resume'),
 };
+
