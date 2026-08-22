@@ -3,6 +3,11 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { studentAPI } from "../../api";
 
+const API_URL =
+  import.meta.env.VITE_API_URL || '/api';
+
+const FILE_BASE_URL = API_URL.replace(/\/api\/?$/, '');
+
 export default function StudentDetails() {
   const { id } = useParams();
 
@@ -52,7 +57,7 @@ export default function StudentDetails() {
 
     {student.resumeUrl && (
       <a
-        href={`http://localhost:5000${student.resumeUrl}`}
+      href={`${FILE_BASE_URL}${student.resumeUrl}`}
         target="_blank"
         rel="noreferrer"
         className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
