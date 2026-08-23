@@ -57,7 +57,8 @@ export default function StudentDetails() {
 
     {student.resumeUrl && (
       <a
-href={student.resumeUrl}
+
+      href={student.resumeUrl}
       target="_blank"
         rel="noreferrer"
         className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
