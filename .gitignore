@@ -3,6 +3,7 @@ node_modules/
 dist/
 .DS_Store
 *.log
+backend/uploads/
 uploads/resumes/*
 uploads/certificates/*
 uploads/profiles/*
