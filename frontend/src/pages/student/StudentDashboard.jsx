@@ -6,6 +6,8 @@ import { studentAPI } from '../../api';
 import { StatCard, PageLoader, StatusBadge, PageHeader, EmptyState } from '../../components/common';
 import { Briefcase, FileText, CheckCircle, XCircle, Clock, TrendingUp, User, ChevronRight } from 'lucide-react';
 
+import ChatBot from '../../components/chatbot/ChatBot';
+
 export default function StudentDashboard() {
   const { user } = useAuth();
 
@@ -263,6 +265,7 @@ const {
           )}
         </div>
       )}
+      <ChatBot student={student} />
     </div>
   );
 }

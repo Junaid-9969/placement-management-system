@@ -151,4 +151,8 @@ export const uploadAPI = {
   deleteResume: () =>
   api.delete('/upload/resume'),
 };
-
+// AI API
+export const aiAPI = {
+  chat: (data) => api.post('/ai/chat', data),
+  getSuggestions: () => api.get('/ai/suggestions')
+};
