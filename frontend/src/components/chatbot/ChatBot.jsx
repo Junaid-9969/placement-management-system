@@ -39,7 +39,7 @@ const MODE_PLACEHOLDERS = {
 // ── Fetch suggestions from backend ───────────────────────────────────────────
 const API_URL = import.meta.env.VITE_API_URL || '';
 const fetchSuggestions = () =>
-  fetch(`${API_URL}/api/ai/suggestions`, {
+  fetch(`${API_URL}/ai/suggestions`, {
     headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
   }).then(r => r.json());
 
@@ -287,7 +287,7 @@ export default function ChatBot({ student }) { {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const response = await fetch(`${API_URL}/api/ai/chat`, {
+      const response = await fetch(`${API_URL}/ai/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
