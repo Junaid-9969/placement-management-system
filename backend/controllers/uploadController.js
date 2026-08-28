@@ -1,6 +1,8 @@
 const Student = require('../models/Student');
 const path = require('path');
 const fs = require('fs');
+const cloudinary = require('../config/cloudinary');
+
 exports.uploadResume = async (req, res) => {
   if (!req.file) {
     return res.status(400).json({
@@ -9,23 +11,51 @@ exports.uploadResume = async (req, res) => {
     });
   }
 
-  // Create an absolute URL pointing to the backend server
-  const fileUrl = `${req.protocol}://${req.get('host')}/uploads/resumes/${req.file.filename}`;
+  try {
+    const publicId = `resumes/resume_${req.user._id}_${Date.now()}`;
 
-  await Student.findOneAndUpdate(
-    { user: req.user._id },
-    { resumeUrl: fileUrl }
-  );
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'placement-management/resumes',
+          public_id: publicId.split('/').pop(),
+          resource_type: 'raw'
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
 
-  res.json({
-    success: true,
-    message: 'Resume uploaded successfully.',
-    data: {
-      url: fileUrl,
-      filename: req.file.filename
-    }
-  });
+      uploadStream.end(req.file.buffer);
+    });
+
+    const fileUrl = result.secure_url;
+
+    await Student.findOneAndUpdate(
+      { user: req.user._id },
+      { resumeUrl: fileUrl }
+    );
+
+    res.json({
+      success: true,
+      message: 'Resume uploaded successfully.',
+      data: {
+        url: fileUrl,
+        filename: req.file.originalname
+      }
+    });
+
+  } catch (error) {
+    console.error('Cloudinary resume upload error:', error);
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload resume.'
+    });
+  }
 };
+
 exports.deleteResume = async (req, res) => {
   const student = await Student.findOne({
     user: req.user._id
@@ -38,43 +68,77 @@ exports.deleteResume = async (req, res) => {
     });
   }
 
-  let resumePath;
-
   try {
-    // Handle absolute URLs
-    if (student.resumeUrl.startsWith('http://') || student.resumeUrl.startsWith('https://')) {
-      resumePath = new URL(student.resumeUrl).pathname;
-    } else {
-      // Handle old relative URLs
-      resumePath = student.resumeUrl;
+    const resumeUrl = student.resumeUrl;
+
+    // Cloudinary resume
+    if (resumeUrl.includes('res.cloudinary.com')) {
+      const url = new URL(resumeUrl);
+
+      const pathParts = url.pathname.split('/');
+
+      // Find "upload" and remove everything before it
+      const uploadIndex = pathParts.indexOf('upload');
+
+      if (uploadIndex !== -1) {
+        let publicIdParts = pathParts.slice(uploadIndex + 1);
+
+        // Remove version e.g. v123456789
+        if (publicIdParts[0]?.startsWith('v')) {
+          publicIdParts.shift();
+        }
+
+        const publicId = publicIdParts.join('/');
+
+        await cloudinary.uploader.destroy(publicId, {
+          resource_type: 'raw'
+        });
+      }
     }
+
+    // Old local resume support
+    else {
+      let resumePath = resumeUrl;
+
+      try {
+        if (
+          resumeUrl.startsWith('http://') ||
+          resumeUrl.startsWith('https://')
+        ) {
+          resumePath = new URL(resumeUrl).pathname;
+        }
+      } catch (error) {
+        console.error('Invalid old resume URL:', error);
+      }
+
+      const filePath = path.join(
+        __dirname,
+        '..',
+        resumePath.replace(/^\/+/, '')
+      );
+
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    student.resumeUrl = null;
+    await student.save();
+
+    res.json({
+      success: true,
+      message: 'Resume deleted successfully'
+    });
+
   } catch (error) {
-    return res.status(400).json({
+    console.error('Resume deletion error:', error);
+
+    res.status(500).json({
       success: false,
-      message: 'Invalid resume URL'
+      message: 'Failed to delete resume.'
     });
   }
-
-  // Convert URL path to local filesystem path
-  const filePath = path.join(
-    __dirname,
-    '..',
-    resumePath.replace(/^\/+/, '')
-  );
-
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-  }
-
-  student.resumeUrl = null;
-  await student.save();
-
-  res.json({
-    success: true,
-    message: 'Resume deleted successfully'
-  });
 };
-
 exports.uploadCertificate = async (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded.' });
 

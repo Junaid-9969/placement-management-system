@@ -22,10 +22,15 @@ const fileFilter = (allowedTypes) => (req, file, cb) => {
 };
 
 exports.uploadResume = multer({
-  storage: storage('resumes'),
-  limits: { fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024 },
-  fileFilter: fileFilter(['application/pdf', 'application/msword', 
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024
+  },
+  fileFilter: fileFilter([
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ])
 });
 
 exports.uploadCertificate = multer({
