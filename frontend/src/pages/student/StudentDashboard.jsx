@@ -107,13 +107,20 @@ const {
 
       {student?.resumeUrl && (
         <a
-          href={student.resumeUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-primary"
-        >
-          Resume
-        </a>
+  href={student.resumeUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="btn-primary"
+  onClick={(e) => {
+    e.preventDefault();
+    window.open(
+      `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(student.resumeUrl)}`,
+      '_blank'
+    );
+  }}
+>
+  Resume
+</a>
       )}
 
     </div>

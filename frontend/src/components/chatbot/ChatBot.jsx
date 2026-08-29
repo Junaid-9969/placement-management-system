@@ -37,7 +37,7 @@ const MODE_PLACEHOLDERS = {
 };
 
 // ── Fetch suggestions from backend ───────────────────────────────────────────
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 const fetchSuggestions = () =>
   fetch(`${API_URL}/ai/suggestions`, {
     headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
@@ -298,9 +298,26 @@ export default function ChatBot({ student }) { {
       });
 
       if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.message || 'Failed to get AI response');
+  let errorMessage = `AI request failed (${response.status})`;
+
+  try {
+    const contentType = response.headers.get('content-type') || '';
+
+    if (contentType.includes('application/json')) {
+      const err = await response.json();
+      errorMessage = err.message || err.error || errorMessage;
+    } else {
+      const text = await response.text();
+      if (text) {
+        errorMessage = text;
       }
+    }
+  } catch (parseError) {
+    console.error('Could not parse AI error response:', parseError);
+  }
+
+  throw new Error(errorMessage);
+}
 
       // Read the streaming response
       const reader = response.body.getReader();

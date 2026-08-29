@@ -239,14 +239,21 @@ export default function StudentProfile() {
           Resume uploaded
         </p>
 
-        <a
-          href={profileData.resumeUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="text-xs text-green-600 hover:underline"
-        >
-          View Resume
-        </a>
+       <a
+  href={profileData.resumeUrl}
+  target="_blank"
+  rel="noreferrer"
+  className="text-xs text-green-600 hover:underline"
+  onClick={(e) => {
+    e.preventDefault();
+    window.open(
+      `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(profileData.resumeUrl)}`,
+      '_blank'
+    );
+  }}
+>
+  View Resume
+</a>
       </div>
     </div>
 

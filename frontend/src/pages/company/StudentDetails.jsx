@@ -56,16 +56,28 @@ export default function StudentDetails() {
   <div className="flex flex-wrap gap-3">
 
     {student.resumeUrl && (
-      <a
+  <button
+    type="button"
+    onClick={() => {
+      const viewerUrl =
+        `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(
+          student.resumeUrl
+        )}`;
 
-      href={student.resumeUrl}
-      target="_blank"
-        rel="noreferrer"
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
-      >
-        📄 Resume
-      </a>
-    )}
+      console.log("Student Resume URL:", student.resumeUrl);
+      console.log("Google Viewer URL:", viewerUrl);
+
+      window.open(
+        viewerUrl,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }}
+    className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+  >
+    📄 Resume
+  </button>
+)}
  
     {student.githubUrl && (
       <a

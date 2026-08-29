@@ -104,10 +104,21 @@ export default function CompanyApplications() {
                         <td><StatusBadge status={app.status} /></td>
                         <td>
                           {app.student?.resumeUrl ? (
-                            <a href={app.student.resumeUrl} target="_blank" rel="noreferrer"
-                              className="text-primary-600 hover:text-primary-700 flex items-center gap-1 text-xs">
-                              <ExternalLink size={12} /> View
-                            </a>
+                            <a
+  href={app.student.resumeUrl}
+  target="_blank"
+  rel="noreferrer"
+  className="text-primary-600 hover:text-primary-700 flex items-center gap-1 text-xs"
+  onClick={(e) => {
+    e.preventDefault();
+    window.open(
+      `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(app.student.resumeUrl)}`,
+      '_blank'
+    );
+  }}
+>
+  <ExternalLink size={12} /> View
+</a>
                           ) : <span className="text-xs text-gray-400">N/A</span>}
                         </td>
                         <td>

@@ -153,14 +153,21 @@ const {
 
   {student.resumeUrl && (
     <a
-      href={student.resumeUrl}
-      target="_blank"
-      rel="noreferrer"
-      className="btn-primary text-xs"
-    >
-      <FileDown size={12} />
-      Resume
-    </a>
+  href={student.resumeUrl}
+  target="_blank"
+  rel="noreferrer"
+  className="btn-primary text-xs"
+  onClick={(e) => {
+    e.preventDefault();
+    window.open(
+      `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(student.resumeUrl)}`,
+      '_blank'
+    );
+  }}
+>
+  <FileDown size={12} />
+  Resume
+</a>
   )}
 
   {student.githubUrl && (

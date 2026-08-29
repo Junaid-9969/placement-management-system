@@ -15,20 +15,20 @@ exports.uploadResume = async (req, res) => {
     const publicId = `resumes/resume_${req.user._id}_${Date.now()}`;
 
     const result = await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: 'placement-management/resumes',
-          public_id: publicId.split('/').pop(),
-          resource_type: 'raw'
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      );
+  const uploadStream = cloudinary.uploader.upload_stream(
+    {
+      folder: 'placement-management/resumes',
+      public_id: publicId.split('/').pop(),
+      resource_type: 'raw'
+    },
+    (error, result) => {
+      if (error) reject(error);
+      else resolve(result);
+    }
+  );
 
-      uploadStream.end(req.file.buffer);
-    });
+  uploadStream.end(req.file.buffer);
+});
 
     const fileUrl = result.secure_url;
 
@@ -91,8 +91,8 @@ exports.deleteResume = async (req, res) => {
         const publicId = publicIdParts.join('/');
 
         await cloudinary.uploader.destroy(publicId, {
-          resource_type: 'raw'
-        });
+  resource_type: 'raw'
+});
       }
     }
 

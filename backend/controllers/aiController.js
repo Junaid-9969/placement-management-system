@@ -82,9 +82,7 @@ const getResumeFile = async (resumeUrl) => {
       timeout: 15000
     });
 
-    const mimeType =
-      response.headers['content-type']?.split(';')[0] ||
-      'application/pdf';
+    const mimeType = 'application/pdf';
 
     console.log('AI Resume MIME Type:', mimeType);
 
@@ -336,14 +334,24 @@ ${student.placedCompany?.companyName || 'Not placed'}
       );
 
       if (resumeFile) {
-        console.log(
-          'AI Resume Document: Successfully loaded'
-        );
-      } else {
-        console.log(
-          'AI Resume Document: Could not be loaded'
-        );
-      }
+  console.log(
+    'AI Resume Document: Successfully loaded'
+  );
+
+  console.log(
+    'AI Resume MIME:',
+    resumeFile.mimeType
+  );
+
+  console.log(
+    'AI Resume Base64 Size:',
+    resumeFile.data.length
+  );
+} else {
+  console.log(
+    'AI Resume Document: Could not be loaded'
+  );
+}
     }
 
 
